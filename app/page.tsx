@@ -2,7 +2,16 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
+// استيراد LazyMotion و domAnimation و المكون الخفيف m بدلاً من استيراد motion العادي
+import { 
+  LazyMotion, 
+  domAnimation, 
+  m, 
+  useInView, 
+  AnimatePresence, 
+  useScroll, 
+  useTransform 
+} from "framer-motion";
 import {
   Phone, PhoneCall, ArrowUpRight, ShieldCheck, BadgeCheck, Zap,
   CheckCircle, Star, UserCheck, Droplets, Flame, Waves, Home,
@@ -65,7 +74,7 @@ function GrainOverlay() {
   );
 }
 
-/* ─── 2. MAGNETIC BUTTON ─── */
+/* ─── 2. MAGNETIC BUTTON (Optimized against Layout Thrashing) ─── */
 interface MagneticBtnProps {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -75,16 +84,24 @@ interface MagneticBtnProps {
 
 function MagneticBtn({ children, style, onClick, ariaLabel }: MagneticBtnProps) {
   const ref = useRef<HTMLButtonElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+
+  const handleMouseEnter = () => {
+    if (ref.current) {
+      rectRef.current = ref.current.getBoundingClientRect(); // قراءة واحدة فقط عند دخول الماوس لمنع الـ Reflow الإجباري
+    }
+  };
 
   const handleMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
+    if (!ref.current || !rectRef.current) return;
+    const rect = rectRef.current;
     const x = (e.clientX - rect.left - rect.width / 2) * 0.38;
     const y = (e.clientY - rect.top - rect.height / 2) * 0.38;
     ref.current.style.transform = `translate(${x}px, ${y}px)`;
   };
 
   const handleLeave = () => {
+    rectRef.current = null;
     if (!ref.current) return;
     ref.current.style.transform = "translate(0, 0)";
   };
@@ -92,6 +109,7 @@ function MagneticBtn({ children, style, onClick, ariaLabel }: MagneticBtnProps) 
   return (
     <button
       ref={ref}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
       onClick={onClick}
@@ -108,7 +126,7 @@ function MagneticBtn({ children, style, onClick, ariaLabel }: MagneticBtnProps) 
   );
 }
 
-/* ─── 3. 3D TILT CARD ─── */
+/* ─── 3. 3D TILT CARD (Optimized against Layout Thrashing) ─── */
 interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -116,10 +134,18 @@ interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function TiltCard({ children, style, ...rest }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (ref.current) {
+      rectRef.current = ref.current.getBoundingClientRect(); // قراءة واحدة فقط وتخزينها كمرجع لمنع الـ Reflow المتكرر
+    }
+    if (rest.onMouseEnter) rest.onMouseEnter(e);
+  };
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
+    if (!ref.current || !rectRef.current) return;
+    const rect = rectRef.current;
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
     ref.current.style.transform = `perspective(900px) rotateY(${x * 13}deg) rotateX(${-y * 13}deg) scale3d(1.02,1.02,1.02)`;
@@ -130,22 +156,19 @@ function TiltCard({ children, style, ...rest }: TiltCardProps) {
   };
 
   const handleLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    rectRef.current = null;
     if (!ref.current) return;
     ref.current.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg) scale3d(1,1,1)";
     ref.current.style.boxShadow = "";
     if (rest.onMouseLeave) rest.onMouseLeave(e);
   };
 
-  const handleEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (rest.onMouseEnter) rest.onMouseEnter(e);
-  };
-
   return (
     <div
       ref={ref}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      onMouseEnter={handleEnter}
       style={{
         transition: "transform 0.09s ease, box-shadow 0.09s ease",
         willChange: "transform",
@@ -183,12 +206,12 @@ function TestimonialsMarquee() {
   return (
     <section id="reviews" ref={ref} aria-labelledby="reviews-title" style={{ background: "#000", padding: "120px 0", borderTop: "1px solid rgba(255,255,255,0.05)", overflow: "hidden" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 28px" }}>
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
+        <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
           <SectionHead badge="Reviews" title="Real people. Real problems fixed." sub="Don't take our word for it — here's what our neighbors say." />
-        </motion.div>
+        </m.div>
       </div>
 
-      <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.3 }}>
+      <m.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.3 }}>
         <div style={{ position: "relative" }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}>
@@ -203,7 +226,7 @@ function TestimonialsMarquee() {
             pointerEvents: "none",
           }} />
 
-          <motion.div
+          <m.div
             animate={{ x: paused ? undefined : ["0%", "-50%"] }}
             transition={paused ? {} : { duration: 36, repeat: Infinity, ease: "linear" }}
             style={{ display: "flex", gap: 18, width: "max-content", padding: "4px 0 18px" }}
@@ -241,7 +264,7 @@ function TestimonialsMarquee() {
                 </div>
               </TiltCard>
             ))}
-          </motion.div>
+          </m.div>
 
           {paused && (
             <div style={{
@@ -253,7 +276,7 @@ function TestimonialsMarquee() {
             </div>
           )}
         </div>
-      </motion.div>
+      </m.div>
     </section>
   );
 }
@@ -271,7 +294,7 @@ interface GlowProps {
 
 function Glow({ w = 400, h = 300, top, left, right, bottom, opacity = 0.12 }: GlowProps) {
   return (
-    <motion.div
+    <m.div
       animate={{ scale: [1, 1.06, 1], opacity: [opacity, opacity * 1.4, opacity] }}
       transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       style={{
@@ -294,12 +317,12 @@ function BlurText({ text, style }: BlurTextProps) {
   return (
     <span ref={ref} style={{ display: "flex", flexWrap: "wrap", gap: "0.28em", ...style }}>
       {text.split(" ").map((w, i) => (
-        <motion.span key={i}
+        <m.span key={i}
           initial={{ filter: "blur(12px)", opacity: 0, y: 36 }}
           animate={inView ? { filter: "blur(0px)", opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.38, delay: i * 0.065, ease: [0.25, 0.1, 0.25, 1] }}>
           {w}
-        </motion.span>
+        </m.span>
       ))}
     </span>
   );
@@ -364,7 +387,7 @@ const NAV_LINKS = [
 function Navbar() {
   return (
     <div style={{ position: "fixed", top: 32, left: 0, right: 0, zIndex: 100, padding: "0 20px" }}>
-      <motion.nav 
+      <m.nav 
         aria-label="Main Navigation"
         initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
         style={{ ...glass, maxWidth: 880, margin: "0 auto", borderRadius: 9999, padding: "9px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -392,7 +415,7 @@ function Navbar() {
           style={{ background: C, color: "#090909", borderRadius: 9999, padding: "8px 18px", fontFamily: sans, fontWeight: 600, fontSize: 13 }}>
           <PhoneCall size={13} aria-hidden="true" /> Get a Free Quote
         </MagneticBtn>
-      </motion.nav>
+      </m.nav>
     </div>
   );
 }
@@ -409,36 +432,37 @@ function Hero() {
   ];
   return (
     <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
-      {/* Optimized background image */}
-      <motion.div style={{ position: "absolute", inset: "-20% 0", y: bgY, zIndex: 0 }}>
+      <m.div style={{ position: "absolute", inset: "-20% 0", y: bgY, zIndex: 0 }}>
         <Image 
-          src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80" 
+          src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=75" // تقليص الجودة والتحجيم الافتراضي لتحسين سرعة التحميل والـ LCP
           alt="Professional plumbing diagnostic services background" 
           fill
           priority
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
-          quality={85}
           style={{ objectFit: "cover" }}
         />
-      </motion.div>
+      </m.div>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.68)", zIndex: 1 }} />
       <Glow w={820} h={420} bottom={-200} left="calc(50% - 410px)" opacity={0.14} />
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 140, background: "linear-gradient(to bottom,#000,transparent)", zIndex: 2 }} />
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200, background: "linear-gradient(to top,#000,transparent)", zIndex: 2 }} />
       <div style={{ position: "relative", zIndex: 10, maxWidth: 920, margin: "0 auto", padding: "180px 28px 100px", textAlign: "center", width: "100%" }}>
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+        <m.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
           style={{ ...glass, display: "inline-flex", alignItems: "center", gap: 8, borderRadius: 9999, padding: "5px 14px", marginBottom: 30 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: C, display: "block", animation: "pulse2 2s infinite" }} aria-hidden="true" />
           <span style={{ fontFamily: sans, fontSize: 12, color: "rgba(255,255,255,0.78)" }}>Available 24/7 — Same-Day Service</span>
-        </motion.div>
+        </m.div>
+        
+        {/* إلغاء BlurText هنا لضمان رندرة النص الأساسي فورياً وتصدر مقياس LCP بأعلى درجة */}
         <h1 style={{ fontFamily: serif, fontStyle: "italic", fontWeight: 700, fontSize: "clamp(2.6rem,5.5vw,5rem)", color: "white", lineHeight: 0.9, letterSpacing: "-1.5px", marginBottom: 26, maxWidth: 820, margin: "0 auto 26px" }}>
-          <BlurText text="The Last Plumber You'll Ever Need to Call" />
+          The Last Plumber You'll Ever Need to Call
         </h1>
-        <motion.p initial={{ opacity: 0, filter: "blur(8px)" }} animate={{ opacity: 1, filter: "blur(0px)" }} transition={{ duration: 0.7, delay: 0.85 }}
+
+        <m.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.2 }}
           style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: "rgba(255,255,255,0.58)", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.75 }}>
           Expert plumbing. Upfront pricing. Licensed & insured. We fix it right the first time — or we come back for free.
-        </motion.p>
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}
+        </m.p>
+        <m.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
           style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 22, flexWrap: "wrap", marginBottom: 60 }}>
           <MagneticBtn
             onClick={() => window.open(CALENDLY_URL, "_blank")}
@@ -450,19 +474,19 @@ function Hero() {
             style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: sans, fontSize: 14, color: "rgba(255,255,255,0.58)", textDecoration: "none" }}>
             <Phone size={14} color={C} aria-hidden="true" /> Call Us: (555) 247-8910
           </a>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.4 }}>
+        </m.div>
+        <m.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
           <div style={{ ...glass, display: "inline-flex", gap: 28, borderRadius: 20, padding: "16px 28px", flexWrap: "wrap", justifyContent: "center" }}>
             {trustItems.map((t, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.4 + i * 0.08 }}
+              <m.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.08 }}
                 style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
                 {t.icon}
                 <span style={{ fontFamily: sans, fontWeight: 600, fontSize: 12, color: "white" }}>{t.val}</span>
                 <span style={{ fontFamily: sans, fontSize: 9, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.14em" }}>{t.sub}</span>
-              </motion.div>
+              </m.div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );
@@ -484,12 +508,12 @@ function Services() {
       <Glow w={360} h={360} top="5%" left="5%" opacity={0.07} />
       <Glow w={300} h={300} top="55%" right="3%" opacity={0.06} />
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative" }}>
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
+        <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
           <SectionHead badge="Our Services" title="We Handle Every Drop, Every Pipe, Every Problem" sub="From a dripping faucet to full system replacements — one call covers it all." />
-        </motion.div>
+        </m.div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 18 }}>
           {svcs.map((s, i) => (
-            <motion.div key={i}
+            <m.div key={i}
               initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, delay: i * 0.09 }}>
               <TiltCard style={{ ...glass, borderRadius: 24, padding: "28px 26px", cursor: "default", height: "100%" }}
@@ -501,7 +525,7 @@ function Services() {
                 <h3 style={{ fontFamily: serif, fontStyle: "italic", fontWeight: 700, fontSize: 20, color: "white", marginBottom: 10 }}>{s.title}</h3>
                 <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "rgba(255,255,255,0.48)", lineHeight: 1.75, margin: 0 }}>{s.desc}</p>
               </TiltCard>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>
@@ -521,13 +545,13 @@ function HowItWorks() {
   return (
     <section id="how-it-works" ref={ref} aria-labelledby="how-it-works-title" style={{ background: "#080808", padding: "120px 28px", borderTop: "1px solid rgba(200,121,65,0.14)" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
+        <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
           <SectionHead badge="How It Works" title="Done Right. Done Fast." sub="Three steps from your first call to a fixed problem." />
-        </motion.div>
+        </m.div>
         <div style={{ display: "flex", flexDirection: w < 768 ? "column" : "row", alignItems: w < 768 ? "stretch" : "flex-start", gap: 0 }}>
           {steps.map((s, i) => (
             <React.Fragment key={i}>
-              <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+              <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.55, delay: i * 0.14 }}
                 style={{ flex: 1 }}>
                 <TiltCard style={{ ...glass, borderRadius: 24, padding: "32px 28px", position: "relative", overflow: "hidden", height: "100%" }}>
@@ -538,29 +562,29 @@ function HowItWorks() {
                   <h3 style={{ fontFamily: serif, fontStyle: "italic", fontWeight: 700, fontSize: 22, color: "white", marginBottom: 12 }}>{s.title}</h3>
                   <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "rgba(255,255,255,0.48)", lineHeight: 1.75, margin: 0 }}>{s.desc}</p>
                 </TiltCard>
-              </motion.div>
+              </m.div>
               {i < 2 && (
                 w < 768 ? (
-                  <motion.div key={`conn-mobile-${i}`}
+                  <m.div key={`conn-mobile-${i}`}
                     initial={{ scaleY: 0 }} animate={inView ? { scaleY: 1 } : {}}
                     transition={{ duration: 0.4, delay: i * 0.14 + 0.35 }}
                     style={{ alignSelf: "center", display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", transformOrigin: "top" }}>
                     <div style={{ width: 1, height: 32, background: `linear-gradient(to bottom, rgba(200,121,65,0.6), rgba(200,121,65,0.15))` }} />
-                    <motion.span animate={{ y: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}
-                      style={{ color: C, fontSize: 14, lineHeight: 1 }}>▼</motion.span>
-                  </motion.div>
+                    <m.span animate={{ y: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}
+                      style={{ color: C, fontSize: 14, lineHeight: 1 }}>▼</m.span>
+                  </m.div>
                 ) : (
-                  <motion.div key={`conn-desktop-${i}`}
+                  <m.div key={`conn-desktop-${i}`}
                     initial={{ scaleX: 0, opacity: 0 }} animate={inView ? { scaleX: 1, opacity: 1 } : {}}
                     transition={{ duration: 0.5, delay: i * 0.14 + 0.4 }}
                     style={{ display: "flex", alignItems: "center", padding: "0 4px", paddingTop: 46, transformOrigin: "left", flexShrink: 0, width: 44 }}>
                     <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, rgba(200,121,65,0.6), rgba(200,121,65,0.2))`, position: "relative" }}>
-                      <motion.div animate={{ x: ["0%", "100%"] }} transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                      <m.div animate={{ x: ["0%", "100%"] }} transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
                         style={{ position: "absolute", top: -2, width: 6, height: 5, borderRadius: "50%", background: C, boxShadow: `0 0 8px ${C}` }} />
                     </div>
-                    <motion.span animate={{ x: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity }}
-                      style={{ color: C, fontSize: 12, marginLeft: 2 }}>▶</motion.span>
-                  </motion.div>
+                    <m.span animate={{ x: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity }}
+                      style={{ color: C, fontSize: 12, marginLeft: 2 }}>▶</m.span>
+                  </m.div>
                 )
               )}
             </React.Fragment>
@@ -579,12 +603,12 @@ function FeaturesChess() {
   return (
     <section ref={ref} style={{ background: "#000", padding: "120px 28px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
+        <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
           <SectionHead badge="Why Plumber" title="Not your average plumber." sub="We built the plumbing company we always wished existed." />
-        </motion.div>
+        </m.div>
         
         {/* Row 1 */}
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.15 }}
+        <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.15 }}
           style={{ display: "grid", gridTemplateColumns: cols, gap: 40, alignItems: "center", marginBottom: 72 }}>
           <div>
             <h3 style={{ fontFamily: serif, fontStyle: "italic", fontWeight: 700, fontSize: "clamp(1.8rem,3vw,2.4rem)", color: "white", lineHeight: 1.1, marginBottom: 18 }}>Upfront pricing. No surprises.</h3>
@@ -603,15 +627,15 @@ function FeaturesChess() {
               </div>
             ))}
           </TiltCard>
-        </motion.div>
+        </m.div>
 
         {/* Row 2 */}
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.3 }}
+        <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.3 }}
           style={{ display: "grid", gridTemplateColumns: cols, gap: 40, alignItems: "center" }}>
           <TiltCard style={{ ...glass, borderRadius: 28, padding: 36, position: "relative", minHeight: 230, overflow: "hidden" }}>
             <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 50% 60%,rgba(200,121,65,0.1) 0%,transparent 70%)" }} />
             {[[28, 38], [52, 56], [68, 33], [43, 72], [74, 58], [35, 65]].map(([x, y], i) => (
-              <motion.div key={i}
+              <m.div key={i}
                 animate={{ scale: [1, 1.3, 1], opacity: [0.65, 1, 0.65] }}
                 transition={{ duration: 2.5 + i * 0.5, repeat: Infinity, delay: i * 0.4 }}
                 style={{ position: "absolute", left: `${x}%`, top: `${y}%`, width: 9, height: 9, borderRadius: "50%", background: C }} />
@@ -630,7 +654,7 @@ function FeaturesChess() {
               Check Your Area
             </MagneticBtn>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );
@@ -665,10 +689,9 @@ function Stats() {
   const w = useWindowWidth();
   return (
     <section ref={ref} style={{ background: "#050505", padding: "120px 28px", position: "relative", overflow: "hidden" }}>
-      {/* Optimized statistics section image */}
       <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
         <Image 
-          src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920&q=80" 
+          src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&q=40" // تقليص الجودة وتغيير القياس لخلفية الإحصائيات غير المؤثرة على الرؤية
           alt="Technical industrial water meters visual representation" 
           fill
           style={{ objectFit: "cover", opacity: 0.09 }}
@@ -676,7 +699,7 @@ function Stats() {
       </div>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 200, background: "linear-gradient(to bottom,#050505,transparent)", zIndex: 1 }} />
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200, background: "linear-gradient(to top,#050505,transparent)", zIndex: 1 }} />
-      <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
+      <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
         style={{ maxWidth: 960, margin: "0 auto", position: "relative", zIndex: 2 }}>
         <TiltCard style={{ ...glass, borderRadius: 32, padding: "56px 44px" }}>
           <div style={{ display: "grid", gridTemplateColumns: w < 640 ? "1fr 1fr" : "repeat(4,1fr)", gap: w < 640 ? "32px 0" : 0 }}>
@@ -701,7 +724,7 @@ function Stats() {
             Join 2,400+ satisfied homeowners across Metro Area
           </p>
         </TiltCard>
-      </motion.div>
+      </m.div>
     </section>
   );
 }
@@ -747,12 +770,12 @@ function FAQ() {
   return (
     <section id="faq" ref={ref} aria-labelledby="faq-title" style={{ background: "#040404", padding: "120px 28px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
+        <m.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
           <SectionHead badge="FAQ" title="Answers before you ask." sub="The questions every homeowner has before calling a plumber." />
-        </motion.div>
+        </m.div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {FAQ_ITEMS.map((item, i) => (
-            <motion.div key={i}
+            <m.div key={i}
               initial={{ opacity: 0, y: 18 }} animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.45, delay: i * 0.07 }}>
               <div style={{
@@ -774,16 +797,16 @@ function FAQ() {
                   <span style={{ fontFamily: sans, fontWeight: 500, fontSize: 15, color: open === i ? "white" : "rgba(255,255,255,0.78)", transition: "color 0.2s", lineHeight: 1.4 }}>
                     {item.q}
                   </span>
-                  <motion.span
+                  <m.span
                     animate={{ rotate: open === i ? 45 : 0 }}
                     transition={{ duration: 0.22 }}
                     style={{ fontFamily: sans, fontSize: 22, color: C, flexShrink: 0, lineHeight: 1, fontWeight: 300 }}>
                     +
-                  </motion.span>
+                  </m.span>
                 </button>
                 <AnimatePresence initial={false}>
                   {open === i && (
-                    <motion.div
+                    <m.div
                       key="body"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -795,14 +818,14 @@ function FAQ() {
                           {item.a}
                         </p>
                       </div>
-                    </motion.div>
+                    </m.div>
                   )}
                 </AnimatePresence>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.5 }}
+        <m.div initial={{ opacity: 0, y: 12 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.5 }}
           style={{ marginTop: 44, textAlign: "center" }}>
           <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 14, color: "rgba(255,255,255,0.35)", marginBottom: 18 }}>
             Still have questions? We pick up the phone.
@@ -812,7 +835,7 @@ function FAQ() {
             style={{ ...glassCopper, borderRadius: 9999, padding: "11px 24px", fontFamily: sans, fontWeight: 600, fontSize: 14, color: CL, display: "inline-flex" }}>
             <Phone size={14} aria-hidden="true" /> Call (555) 247-8910
           </MagneticBtn>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );
@@ -845,7 +868,6 @@ type ModalType = 'privacy' | 'terms' | 'sitemap' | null;
 function CtaFooter() {
   const [modal, setModal] = useState<ModalType>(null);
 
-  // Close modal when pressing Escape key (a11y improvement)
   useEffect(() => {
     if (!modal) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -881,7 +903,7 @@ function CtaFooter() {
       {/* Modal */}
       <AnimatePresence>
         {modal && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setModal(null)}
             style={{
@@ -889,7 +911,7 @@ function CtaFooter() {
               background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)",
               display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
             }}>
-            <motion.div
+            <m.div
               initial={{ scale: 0.92, y: 24 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.92, y: 24 }}
               onClick={e => e.stopPropagation()}
               role="dialog"
@@ -919,8 +941,8 @@ function CtaFooter() {
                 style={{ marginTop: 24, fontFamily: sans, fontSize: 13, color: "rgba(255,255,255,0.38)", background: "none", border: "none", cursor: "pointer" }}>
                 Close (Esc)
               </button>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -946,14 +968,19 @@ function CtaFooter() {
           </MagneticBtn>
         </div>
       </div>
+      
+      {/* 
+        تحسين نسبة تباين الألوان هنا لرفع مقياس Accessibility إلى 100/100 
+        تم تعديل الشفافية لتصبح واضحة وقابلة للقراءة بوضوح وفقاً لتقرير Lighthouse
+      */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "28px 28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14, maxWidth: 1100, margin: "0 auto" }}>
-        <span style={{ fontFamily: sans, fontSize: 11, color: "rgba(255,255,255,0.22)" }}>© 2026 Plumber. Licensed Plumbing Contractor. All rights reserved.</span>
-        <span style={{ fontFamily: sans, fontSize: 11, color: "rgba(255,255,255,0.18)" }}>Serving Denver, Aurora, Lakewood & Surrounding Areas</span>
+        <span style={{ fontFamily: sans, fontSize: 11, color: "rgba(255,255,255,0.65)" }}>© 2026 Plumber. Licensed Plumbing Contractor. All rights reserved.</span>
+        <span style={{ fontFamily: sans, fontSize: 11, color: "rgba(255,255,255,0.55)" }}>Serving Denver, Aurora, Lakewood & Surrounding Areas</span>
         <div style={{ display: "flex", gap: 16 }}>
           {(["privacy", "terms", "sitemap"] as const).map((key) => (
             <button key={key}
               onClick={() => setModal(key)}
-              style={{ fontFamily: sans, fontSize: 11, color: "rgba(255,255,255,0.38)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3, padding: 0 }}>
+              style={{ fontFamily: sans, fontSize: 11, color: "rgba(255,255,255,0.65)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3, padding: 0 }}>
               {key === "privacy" ? "Privacy Policy" : key === "terms" ? "Terms" : "Sitemap"}
             </button>
           ))}
@@ -974,7 +1001,7 @@ function StickyCall() {
   return (
     <AnimatePresence>
       {show && (
-        <motion.div
+        <m.div
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
@@ -993,7 +1020,7 @@ function StickyCall() {
             cursor: "pointer",
           }}>
           <PhoneCall size={15} aria-hidden="true" /> Call Now — Free Quote
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );
@@ -1029,20 +1056,20 @@ function CopperCursor() {
   const [pos, setPos] = useState({ x: -100, y: -100 });
   const [hov, setHov] = useState(false);
   useEffect(() => {
-    const m = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
+    const mEvent = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
     const over = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       setHov(!!target?.closest("button,a,[data-hover]"));
     };
-    window.addEventListener("mousemove", m);
+    window.addEventListener("mousemove", mEvent);
     window.addEventListener("mouseover", over);
     return () => {
-      window.removeEventListener("mousemove", m);
+      window.removeEventListener("mousemove", mEvent);
       window.removeEventListener("mouseover", over);
     };
   }, []);
   return (
-    <motion.div
+    <m.div
       aria-hidden="true"
       animate={{ x: pos.x - 6, y: pos.y - 6, scale: hov ? 2.8 : 1 }}
       transition={{ type: "spring", stiffness: 500, damping: 30 }}
@@ -1058,7 +1085,6 @@ function CopperCursor() {
 
 /* ─── MAIN LANDING PAGE COMPONENT ─── */
 export default function LandingPage() {
-  // Local plumbing schema integration for enhanced SEO
   const schemaMarkup = {
     "@context": "https://schema.org",
     "@type": "PlumbingService",
@@ -1099,31 +1125,29 @@ export default function LandingPage() {
   };
 
   return (
-    <main style={{ background: "#000", minHeight: "100vh" }}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
-      />
-      {/* Schema.org Integration for SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
-      />
+    /* تغليف الصفحة بالكامل بـ LazyMotion لتقليل مساحة الجافا سكريبت وتحميل الحركات بسلاسة */
+    <LazyMotion features={domAnimation}>
+      <main style={{ background: "#000", minHeight: "100vh" }}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+        />
 
-      <GrainOverlay />
-      <ScrollProgress />
-      <CopperCursor />
-      <Navbar />
-      <Hero />
-      <Services />
-      <HowItWorks />
-      <FeaturesChess />
-      <Stats />
-      <TestimonialsMarquee />
-      <FAQ />
-      <TrustStrip />
-      <CtaFooter />
-      <StickyCall />
-    </main>
+        <GrainOverlay />
+        <ScrollProgress />
+        <CopperCursor />
+        <Navbar />
+        <Hero />
+        <Services />
+        <HowItWorks />
+        <FeaturesChess />
+        <Stats />
+        <TestimonialsMarquee />
+        <FAQ />
+        <TrustStrip />
+        <CtaFooter />
+        <StickyCall />
+      </main>
+    </LazyMotion>
   );
 }

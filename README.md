@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Premium High-Conversion Plumbing Service Landing Page
 
-## Getting Started
+A production-ready, highly optimized, and accessible single-page landing page designed for a premium plumbing service contractor. Built using **Next.js (App Router)**, **TypeScript (TSX)**, **Tailwind CSS (v4)**, and **Framer Motion**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🤖 AI Quick-Context (LLM Readme)
+> **For AI Models & Code Agents:** This repository contains a fully responsive, semantic, and high-performance single-page app. It strictly adheres to Next.js App Router conventions, TypeScript type-safety, and WCAG AA accessibility standards. All client-side interactions (animations, state-updates, and browser API window accesses) are wrapped safely to prevent hydration mismatches and SSR errors.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack & Key Dependencies
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** Next.js (App Router)
+- **Language:** TypeScript (TSX)
+- **Styling:** Tailwind CSS (v4) & custom CSS Variables (`globals.css`)
+- **Animation Engine:** Framer Motion (for smooth micro-interactions, viewport animations, and custom scroll effects)
+- **Icons:** Lucide React
+- **Typography:** 
+  - Serif: `Playfair Display` (mapped to CSS Variable `--font-playfair`)
+  - Sans-Serif: `DM Sans` (mapped to CSS Variable `--font-dm-sans` as default body font)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📂 Codebase Architecture & File Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+├── app/
+│   ├── layout.tsx      # Configures Google Fonts, Global Metadata, and injects CSS Variables.
+│   ├── page.tsx        # Single-Entry point containing the fully typed Landing Page component.
+│   ├── globals.css     # Tailwind imports, scrollbar config, @keyframes, and accessibility focus rings.
+├── next.config.ts      # Optimizes Next.js compiler options and whitelists remote patterns for images.
