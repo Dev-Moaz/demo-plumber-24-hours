@@ -5,6 +5,11 @@
   --foreground: #fafafa;
 }
 
+/* تفعيل التمرير السلس للموقع بالكامل لتحسين تجربة التنقل الداخلي */
+html {
+  scroll-behavior: smooth;
+}
+
 /* إعادة ضبط الهوامش الأساسية للحماية من أي تداخل */
 * {
   margin: 0;
@@ -18,6 +23,17 @@ body {
   /* جعل خط DM Sans هو الخط الافتراضي لكامل الموقع لضمان اتساق المظهر */
   font-family: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
+}
+
+/* 
+   حل مشكلة الـ Accessibility الخاصة بألوان حلقات التركيز (Focus Rings):
+   إعطاء حلقة واضحة ومميزة بلون نحاسي متناسق مع تصميم الموقع للمستخدمين 
+   الذين يتنقلون باستخدام لوحة المفاتيح (Tab key).
+*/
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #E8965A;
+  outline-offset: 4px;
 }
 
 /* حركة النبض المخصصة للمؤشرات التفاعلية الحية */

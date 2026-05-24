@@ -39,10 +39,11 @@ const glassStrong: React.CSSProperties = {
 const serif = "var(--font-playfair), serif";
 const sans = "var(--font-dm-sans), sans-serif";
 
-/* ─── useWindowWidth Hook ─── */
+/* ─── useWindowWidth Hook (Hydration-Safe) ─── */
 function useWindowWidth(): number {
-  const [w, setW] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 1200);
+  const [w, setW] = useState<number>(1200);
   useEffect(() => {
+    setW(window.innerWidth);
     const h = () => setW(window.innerWidth);
     window.addEventListener("resize", h);
     return () => window.removeEventListener("resize", h);
@@ -64,64 +65,7 @@ function GrainOverlay() {
   );
 }
 
-/* ─── 2. URGENCY BAR ─── */
-function UrgencyBar() {
-  const slots = ["Today 4:00–6:00 PM", "Today 6:00–8:00 PM", "Tomorrow 8:00–10:00 AM"];
-  const [crews, setCrews] = useState<number>(3);
-  const [slotIdx, setSlotIdx] = useState<number>(0);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setCrews(c => (c <= 2 ? 4 : c - 1));
-      setSlotIdx(i => (i + 1) % slots.length);
-    }, 7000);
-    return () => clearInterval(t);
-  }, [slots.length]);
-
-  return (
-    <div style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
-      background: C, padding: "7px 20px",
-      display: "flex", alignItems: "center", justifyContent: "center", gap: 14,
-      fontFamily: sans, fontSize: 12, fontWeight: 600, color: "#080808",
-    }}>
-      <span 
-        aria-hidden="true"
-        style={{
-          width: 7, height: 7, borderRadius: "50%", background: "#000",
-          display: "inline-block", opacity: 0.45, flexShrink: 0,
-          animation: "pulse2 1.2s infinite",
-        }} 
-      />
-
-      <AnimatePresence mode="wait">
-        <motion.span key={crews}
-          initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 10, opacity: 0 }} transition={{ duration: 0.3 }}>
-          {crews} crews available now
-        </motion.span>
-      </AnimatePresence>
-
-      <span style={{ opacity: 0.35 }} aria-hidden="true">·</span>
-
-      <span style={{ fontWeight: 400, opacity: 0.75 }}>Next slot: </span>
-      <AnimatePresence mode="wait">
-        <motion.span key={slotIdx}
-          initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 8, opacity: 0 }} transition={{ duration: 0.3 }}>
-          {slots[slotIdx]}
-        </motion.span>
-      </AnimatePresence>
-
-      <span style={{ opacity: 0.35 }} aria-hidden="true">·</span>
-
-      <span style={{ fontWeight: 400, opacity: 0.75 }}>Average wait: </span>
-      <span>47 min</span>
-    </div>
-  );
-}
-
-/* ─── 3. MAGNETIC BUTTON ─── */
+/* ─── 2. MAGNETIC BUTTON ─── */
 interface MagneticBtnProps {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -164,7 +108,7 @@ function MagneticBtn({ children, style, onClick, ariaLabel }: MagneticBtnProps) 
   );
 }
 
-/* ─── 4. 3D TILT CARD ─── */
+/* ─── 3. 3D TILT CARD ─── */
 interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -214,7 +158,7 @@ function TiltCard({ children, style, ...rest }: TiltCardProps) {
   );
 }
 
-/* ─── 5. TESTIMONIALS MARQUEE ─── */
+/* ─── 4. TESTIMONIALS MARQUEE ─── */
 interface ReviewItem {
   q: string;
   name: string;
@@ -419,7 +363,7 @@ const NAV_LINKS = [
 
 function Navbar() {
   return (
-    <div style={{ position: "fixed", top: 64, left: 0, right: 0, zIndex: 100, padding: "0 20px" }}>
+    <div style={{ position: "fixed", top: 32, left: 0, right: 0, zIndex: 100, padding: "0 20px" }}>
       <motion.nav 
         aria-label="Main Navigation"
         initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
@@ -472,6 +416,8 @@ function Hero() {
           alt="Professional plumbing diagnostic services background" 
           fill
           priority
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+          quality={85}
           style={{ objectFit: "cover" }}
         />
       </motion.div>
@@ -1167,8 +1113,6 @@ export default function LandingPage() {
       <GrainOverlay />
       <ScrollProgress />
       <CopperCursor />
-      <UrgencyBar />
-
       <Navbar />
       <Hero />
       <Services />
