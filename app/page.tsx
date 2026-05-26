@@ -170,11 +170,11 @@ interface ReviewItem {
 }
 
 const ALL_REVIEWS: ReviewItem[] = [
-  { q: "Called at 11pm for a burst pipe. Tech was at my door in 45 minutes, fixed it in an hour. I've never felt so taken care of. Plumber for life.", name: "James R.", role: "Homeowner, Denver CO", init: "JR" },
-  { q: "Three other plumbers gave me vague estimates. Plumber quoted me $340 flat, showed up on time, and charged me exactly $340. Refreshing.", name: "Maria T.", role: "Condo Owner, Austin TX", init: "MT" },
-  { q: "The warranty sold me. They fixed my water heater and six months later when the pressure dropped, they came back free of charge. Remarkable.", name: "David K.", role: "Property Manager, Phoenix AZ", init: "DK" },
-  { q: "Tried two other services before finding Plumber. Night and day difference. Professional, fast, and honest. They have my business for life.", name: "Sandra L.", role: "Homeowner, Boulder CO", init: "SL" },
-  { q: "Fixed a leak that two other guys said required tearing out half my kitchen wall. 20 minutes, no mess, no drama. Absolute pros.", name: "Tom W.", role: "Homeowner, Arvada CO", init: "TW" },
+  { q: "Called at 11pm for a burst pipe. Tech was at my door in 45 minutes, fixed it in an hour. I've never felt so taken care of. Plumber for life.", name: "James R.", role: "Homeowner, Irvine CA", init: "JR" },
+  { q: "Three other plumbers gave me vague estimates. Plumber quoted me $340 flat, showed up on time, and charged me exactly $340. Refreshing.", name: "Maria T.", role: "Condo Owner, Newport Beach CA", init: "MT" },
+  { q: "The warranty sold me. They fixed my water heater and six months later when the pressure dropped, they came back free of charge. Remarkable.", name: "David K.", role: "Property Manager, Anaheim CA", init: "DK" },
+  { q: "Tried two other services before finding Plumber. Night and day difference. Professional, fast, and honest. They have my business for life.", name: "Sandra L.", role: "Homeowner, Huntington Beach CA", init: "SL" },
+  { q: "Fixed a leak that two other guys said required tearing out half my kitchen wall. 20 minutes, no mess, no drama. Absolute pros.", name: "Tom W.", role: "Homeowner, San Clemente CA", init: "TW" },
 ];
 
 const marqueeKeyframes = `
@@ -626,16 +626,16 @@ function FeaturesChess() {
                 style={{ position: "absolute", left: `${x}%`, top: `${y}%`, width: 9, height: 9, borderRadius: "50%", background: C }} />
             ))}
             <div style={{ position: "relative", zIndex: 1 }}>
-              {/* تعديل وتعديل العبارة الدائرية لتصبح نصا تحريريا راقيا وخاليا من مظهر الـ AI الجاهز */}
+              {/* تعديل وتعديل العبارة الدائرية لتصبح نصا تحريريا راقيا وخاليا من مظهر الـ AI الجاهز للمنطقة الجديدة */}
               <p style={{ fontFamily: sans, fontSize: 13, color: CL, fontWeight: 600, letterSpacing: "0.02em", margin: "0 0 10px 0" }}>
-                Serving Greater Metro Area — 25 mile radius
+                Serving All of Orange County
               </p>
-              <div style={{ fontFamily: sans, fontSize: 13, color: "#64748B", marginTop: 8 }}>12 crews deployed across the area</div>
+              <div style={{ fontFamily: sans, fontSize: 13, color: "#64748B", marginTop: 8 }}>12 crews deployed across Orange County</div>
             </div>
           </TiltCard>
           <div>
             <h3 style={{ fontFamily: serif, fontStyle: "italic", fontWeight: 700, fontSize: "clamp(1.8rem,3vw,2.4rem)", color: "#0F172A", lineHeight: 1.1, marginBottom: 18 }}>We're in your neighborhood. Always.</h3>
-            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: "#475569", lineHeight: 1.8, marginBottom: 28 }}>With 12 crews deployed across the metro area, we guarantee arrival within 60 minutes — any time, day or night. Rain, snow, or 2am — your emergency is ours.</p>
+            <p style={{ fontFamily: sans, fontWeight: 300, fontSize: 15, color: "#475569", lineHeight: 1.8, marginBottom: 28 }}>With 12 crews deployed across Orange County, we guarantee arrival within 60 minutes — any time, day or night. Rain, shine, or 2am — your emergency is ours.</p>
             <MagneticBtn style={{ ...glassStrong, borderRadius: 9999, padding: "10px 22px", fontFamily: sans, color: "#0F172A", fontSize: 14 }}>
               Check Your Area
             </MagneticBtn>
@@ -707,7 +707,7 @@ function Stats() {
             ))}
           </div>
           <p style={{ fontFamily: sans, fontSize: 10, color: "#94A3B8", textAlign: "center", marginTop: 38, textTransform: "uppercase", letterSpacing: "0.15em" }}>
-            Join 2,400+ satisfied homeowners across Metro Area
+            Join 2,400+ satisfied homeowners across Orange County
           </p>
         </TiltCard>
       </m.div>
@@ -739,8 +739,8 @@ const FAQ_ITEMS: FAQItemType[] = [
     a: "It's covered under our warranty — we come back free of charge. We've built our business on repeat customers and referrals, so leaving a job half-done would be business suicide for us.",
   },
   {
-    q: "Do you service my area? What if I'm outside the 25-mile radius?",
-    a: "We cover the entire Greater Metro Denver area within a 25-mile radius, including Aurora, Lakewood, Arvada, Westminster, and Englewood. Call us and we'll confirm your address — we occasionally extend coverage for larger jobs.",
+    q: "Do you service my area? What if I'm outside Orange County?",
+    a: "We cover all of Orange County, including Irvine, Anaheim, Newport Beach, Huntington Beach, and San Clemente. Call us and we'll confirm your address — we occasionally extend coverage to border cities in LA and Riverside counties for larger jobs.",
   },
   {
     q: "What counts as a plumbing emergency?",
@@ -872,7 +872,7 @@ function CtaFooter() {
     },
     terms: {
       title: "Terms of Service",
-      body: "By booking with Plumber, you agree that all quoted prices are flat-rate and binding once confirmed. Our 12-month craftsmanship warranty covers defects in workmanship only. We reserve the right to reschedule emergency visits during extreme weather events. Disputes are governed by the laws of the State of Colorado.",
+      body: "By booking with Plumber, you agree that all quoted prices are flat-rate and binding once confirmed. Our 12-month craftsmanship warranty covers defects in workmanship only. We reserve the right to reschedule emergency visits during extreme weather events. Disputes are governed by the laws of the State of California.",
       links: null,
       ids: null
     },
@@ -956,7 +956,7 @@ function CtaFooter() {
       
       <div style={{ borderTop: "1px solid #E2E8F0", padding: "28px 28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14, maxWidth: 1100, margin: "0 auto" }}>
         <span style={{ fontFamily: sans, fontSize: 11, color: "#64748B" }}>© 2026 Plumber. Licensed Plumbing Contractor. All rights reserved.</span>
-        <span style={{ fontFamily: sans, fontSize: 11, color: "#64748B" }}>Serving Denver, Aurora, Lakewood & Surrounding Areas</span>
+        <span style={{ fontFamily: sans, fontSize: 11, color: "#64748B" }}>Serving Orange County, Irvine, Anaheim & Surrounding Areas</span>
         <div style={{ display: "flex", gap: 16 }}>
           {(["privacy", "terms", "sitemap"] as const).map((key) => (
             <button key={key}
@@ -1043,14 +1043,14 @@ export default function LandingPage() {
     "url": "https://plumber.com",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": "Denver",
-      "addressRegion": "CO",
+      "addressLocality": "Orange County",
+      "addressRegion": "CA",
       "addressCountry": "US"
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": "39.7392",
-      "longitude": "-104.9903"
+      "latitude": "33.6846",
+      "longitude": "-117.8265"
     },
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
